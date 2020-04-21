@@ -6425,10 +6425,9 @@ function setnew_password_and_mail($user, $fasthash = false) {
 
     update_internal_user_password($user, $newpassword, $fasthash);
 
-    $a = new stdClass();
+    $a = clone $user;
     $a->firstname   = fullname($user, true);
     $a->sitename    = format_string($site->fullname);
-    $a->username    = $user->username;
     $a->newpassword = $newpassword;
     $a->link        = $CFG->wwwroot .'/login/?lang='.$lang;
     $a->signoff     = generate_email_signoff();
@@ -6498,7 +6497,7 @@ function send_confirmation_email($user, $confirmationurl = null) {
     $site = get_site();
     $supportuser = core_user::get_support_user();
 
-    $data = new stdClass();
+    $data = clone $user;
     $data->firstname = fullname($user);
     $data->sitename  = format_string($site->fullname);
     $data->admin     = generate_email_signoff();
@@ -6546,10 +6545,7 @@ function send_password_change_confirmation_email($user, $resetrecord) {
     $supportuser = core_user::get_support_user();
     $pwresetmins = isset($CFG->pwresettime) ? floor($CFG->pwresettime / MINSECS) : 30;
 
-    $data = new stdClass();
-    $data->firstname = $user->firstname;
-    $data->lastname  = $user->lastname;
-    $data->username  = $user->username;
+    $data = clone $user;
     $data->sitename  = format_string($site->fullname);
     $data->link      = $CFG->wwwroot .'/login/forgot_password.php?token='. $resetrecord->token;
     $data->admin     = generate_email_signoff();
@@ -6573,10 +6569,7 @@ function send_password_change_info($user) {
     $site = get_site();
     $supportuser = core_user::get_support_user();
 
-    $data = new stdClass();
-    $data->firstname = $user->firstname;
-    $data->lastname  = $user->lastname;
-    $data->username  = $user->username;
+    $data = clone $user;
     $data->sitename  = format_string($site->fullname);
     $data->admin     = generate_email_signoff();
 

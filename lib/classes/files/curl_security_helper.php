@@ -53,6 +53,20 @@ class curl_security_helper extends curl_security_helper_base {
         'http' => 80,
         'https' => 443
     ];
+    /**
+     * array of security helpers.
+     */
+    protected $pluginssecurityhelperfunction;
+
+    /**
+     * curl_security_helper constructor.
+     */
+    public function __construct() {
+
+        // Augument all installed plugin's security helper if there is any.
+        // Plgins function has to be defined as plugintype_pluginname_security_helper in pluginname/lib.php file.
+        $this->pluginssecurityhelperfunction = get_plugins_with_function('security_helper');
+    }
 
     /**
      * Checks whether the given URL is blocked by checking its address and port number against the allow/block lists.
@@ -63,6 +77,21 @@ class curl_security_helper extends curl_security_helper_base {
      * @return bool true if the URL is blocked or invalid and false if the URL is not blocked.
      */
     public function url_is_blocked($urlstring) {
+
+        // Augument all installed plugin's security helper if there is any.
+        // If any of the security helper's function returns true, treat as URL is blocked.
+        foreach ($this->pluginssecurityhelperfunction as $plugins) {
+            foreach ($plugins as $function) {
+                $pluginsecurityhelper = $function($urlstring);
+                if ($pluginsecurityhelper instanceof \core\files\curl_security_helper_base
+                    && !($pluginsecurityhelper instanceof \core\files\curl_security_helper)) {
+                    if ($pluginsecurityhelper->url_is_blocked($urlstring)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         // If no config data is present, then all hosts/ports are allowed.
         if (!$this->is_enabled()) {
             return false;
